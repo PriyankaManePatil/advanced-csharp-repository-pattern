@@ -10,14 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseInMemoryDatabase("InMemoryDb"));
 
-// Register repository
+// Register repository and service layer
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
-// Minimal API route for reference\app.MapGet("/products", async (IProductRepository repo) =>
+// Minimal API route for reference
+app.MapGet("/products", async (IProductService service) =>
 {
-    var products = await repo.GetAllAsync();
+    var products = await service.GetAllAsync();
     return Results.Ok(products);
 });
 
