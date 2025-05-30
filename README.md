@@ -66,6 +66,17 @@ dotnet test
 
 ---
 
+## 🖼 Architecture Diagram
+
+![Architecture Diagram](docs/architecture-diagram.png)
+
+This diagram illustrates the separation of concerns in the project using Dependency Injection:
+- Web API calls Service Layer
+- Service Layer uses Repository (Data Access)
+- Repository uses EF Core to interact with the database
+
+---
+
 ## 📜 License
 
 This project is licensed under the MIT License. Feel free to fork and adapt.
