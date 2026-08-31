@@ -2,47 +2,39 @@ using Core.Entities;
 using Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Repositories
+namespace Infrastructure.Repositories;
+
+public sealed class ProductRepository(AppDbContext context) : IProductRepository
 {
-    /// <summary>
-    /// Provides implementation of IProductRepository using EF Core.
-    /// </summary>
-    public class ProductRepository : IProductRepository
+    public async Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        await context.Products.AsNoTracking().OrderBy(x => x.ProductId).ToListAsync(cancellationToken);
+
+    public Task<Product?> GetByIdAsync(int productId, CancellationToken cancellationToken = default) =>
+        context.Products.AsNoTracking().SingleOrDefaultAsync(x => x.ProductId == productId, cancellationToken);
+
+    public async Task<Product> AddAsync(Product product, CancellationToken cancellationToken = default)
     {
-        private readonly AppDbContext _context;
+        ArgumentNullException.ThrowIfNull(product);
+        await context.Products.AddAsync(product, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+        return product;
+    }
 
-        public ProductRepository(AppDbContext context)
-        {
-            _context = context;
-        }
+    public async Task<bool> UpdateAsync(Product product, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(product);
+        if (!await context.Products.AnyAsync(x => x.ProductId == product.ProductId, cancellationToken)) return false;
+        context.Products.Update(product);
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
 
-        public async Task<IEnumerable<Product>> GetAllAsync() =>
-            await _context.Products.ToListAsync();
-
-        public async Task<Product?> GetByIdAsync(int productId) =>
-            await _context.Products.FindAsync(productId);
-
-        public async Task AddAsync(Product product)
-        {
-            await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(Product product)
-        {
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int productId)
-        {
-            var entity = await _context.Products.FindAsync(productId);
-            if (entity != null)
-            {
-                _context.Products.Remove(entity);
-                await _context.SaveChangesAsync();
-            }
-        }
+    public async Task<bool> DeleteAsync(int productId, CancellationToken cancellationToken = default)
+    {
+        var product = await context.Products.FindAsync([productId], cancellationToken);
+        if (product is null) return false;
+        context.Products.Remove(product);
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }
-

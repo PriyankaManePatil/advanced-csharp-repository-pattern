@@ -1,17 +1,12 @@
 using Core.Entities;
 
-namespace Core.Interfaces
-{
-    /// <summary>
-    /// Defines contract for product data access.
-    /// </summary>
-    public interface IProductRepository
-    {
-        Task<IEnumerable<Product>> GetAllAsync();
-        Task<Product?> GetByIdAsync(int productId);
-        Task AddAsync(Product product);
-        Task UpdateAsync(Product product);
-        Task DeleteAsync(int productId);
-    }
-}
+namespace Core.Interfaces;
 
+public interface IProductRepository
+{
+    Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Product?> GetByIdAsync(int productId, CancellationToken cancellationToken = default);
+    Task<Product> AddAsync(Product product, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAsync(Product product, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(int productId, CancellationToken cancellationToken = default);
+}
