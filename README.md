@@ -2,7 +2,7 @@
 
 [![.NET CI](https://github.com/PriyankaManePatil/advanced-csharp-repository-pattern/actions/workflows/dotnet.yml/badge.svg)](https://github.com/PriyankaManePatil/advanced-csharp-repository-pattern/actions/workflows/dotnet.yml)
 
-A buildable .NET 8 reference implementation of Repository Pattern and layered architecture. It demonstrates dependency inversion, an application service layer, Entity Framework Core, Minimal APIs, validation, error handling, automated tests and CI.
+A comprehensive **.NET 10 LTS educational reference** for Repository Pattern and layered architecture. It demonstrates aggregate-specific and generic repositories, read/write segregation, specifications, Unit of Work, decorators, caching, test doubles, Minimal APIs, automated tests and CI.
 
 > This project uses EF Core's in-memory provider for learning and architectural demonstration. Use a durable database provider and production security/observability controls for a real deployment.
 
@@ -17,7 +17,7 @@ WebApi -> Application -> Core
 - **Core**: domain entities and persistence abstractions
 - **Application**: DTOs, validation and use-case orchestration
 - **Infrastructure**: EF Core context and repository implementation
-- **WebApi**: Minimal API endpoints, dependency injection, Swagger and exception handling
+- **WebApi**: Minimal API endpoints, dependency injection, first-party OpenAPI and exception handling
 - **UnitTests**: isolated application service tests
 - **IntegrationTests**: repository and HTTP endpoint tests
 
@@ -25,16 +25,17 @@ WebApi -> Application -> Core
 
 ## Technology
 
-- .NET 8
+- .NET 10 LTS
 - ASP.NET Core Minimal APIs
 - Entity Framework Core In-Memory
+- EF Core 10.0.11 and ASP.NET Core OpenAPI
 - xUnit, Moq and WebApplicationFactory
 - Coverlet code coverage
 - GitHub Actions
 
 ## Run locally
 
-Install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), then run:
+Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), then run:
 
 ```bash
 dotnet restore AdvancedRepositoryPattern.sln
@@ -42,7 +43,21 @@ dotnet build AdvancedRepositoryPattern.sln
 dotnet run --project src/WebApi/WebApi.csproj
 ```
 
-In Development, Swagger is available at `http://localhost:<port>/swagger`. The exact port is printed by `dotnet run`.
+In Development, the OpenAPI document is available at `http://localhost:<port>/openapi/v1.json`.
+
+## Learning documentation
+
+The detailed learning path is in [`docs/README.md`](docs/README.md). It includes fundamentals, a repository-variant catalogue, a class-by-class walkthrough, decision tables, testing guidance and anti-patterns.
+
+Implemented examples include:
+
+- Aggregate-specific and generic repositories
+- Read-only and read/write-segregated contracts
+- Specification pattern
+- Unit of Work
+- Logging and caching decorators
+- In-memory test-double repository
+- Guidance for direct EF Core, Dapper, CQRS, event sourcing and composite repositories
 
 ## API
 
@@ -76,6 +91,7 @@ Tests cover service validation, CRUD repository behaviour, missing records and H
 
 - Read queries use `AsNoTracking`.
 - Repository operations accept cancellation tokens.
+- Repository writes stage changes; Unit of Work commits successful business operations once.
 - Update and delete return `bool` to represent not-found results without exceptions.
 - API contracts use DTOs rather than exposing EF Core entities.
 - Standard `ILogger<T>` is preferred over a custom logging wrapper.

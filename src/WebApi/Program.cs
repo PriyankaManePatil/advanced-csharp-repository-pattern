@@ -7,8 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// .NET 10 provides first-party OpenAPI generation; no third-party Swagger generator is required.
+builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddHealthChecks();
@@ -16,11 +16,8 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 app.UseExceptionHandler();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// The JSON document is useful for learning, client generation and contract inspection.
+if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
 var products = app.MapGroup("/api/products").WithTags("Products");
 products.MapGet("/", async (IProductService service, CancellationToken ct) => Results.Ok(await service.GetAllAsync(ct)));

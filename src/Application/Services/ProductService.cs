@@ -5,7 +5,8 @@ using Core.Interfaces;
 
 namespace Application.Services;
 
-public sealed class ProductService(IProductRepository repository) : IProductService
+/// <summary>Coordinates validation, repository operations and the transaction boundary.</summary>
+public sealed class ProductService(IProductRepository repository, IUnitOfWork unitOfWork) : IProductService
 {
     public async Task<IReadOnlyList<ProductDto>> GetAllAsync(CancellationToken cancellationToken = default) =>
         (await repository.GetAllAsync(cancellationToken)).Select(Map).ToList();
@@ -21,25 +22,31 @@ public sealed class ProductService(IProductRepository repository) : IProductServ
     {
         ArgumentNullException.ThrowIfNull(request);
         var product = new Product { Name = NormalizeName(request.Name), Price = EnsureValidPrice(request.Price) };
-        return Map(await repository.AddAsync(product, cancellationToken));
+        var created = await repository.AddAsync(product, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Map(created);
     }
 
     public async Task<bool> UpdateAsync(int productId, SaveProductRequest request, CancellationToken cancellationToken = default)
     {
         EnsureValidId(productId);
         ArgumentNullException.ThrowIfNull(request);
-        return await repository.UpdateAsync(new Product
+        var updated = await repository.UpdateAsync(new Product
         {
             ProductId = productId,
             Name = NormalizeName(request.Name),
             Price = EnsureValidPrice(request.Price)
         }, cancellationToken);
+        if (updated) await unitOfWork.SaveChangesAsync(cancellationToken);
+        return updated;
     }
 
-    public Task<bool> DeleteAsync(int productId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(int productId, CancellationToken cancellationToken = default)
     {
         EnsureValidId(productId);
-        return repository.DeleteAsync(productId, cancellationToken);
+        var deleted = await repository.DeleteAsync(productId, cancellationToken);
+        if (deleted) await unitOfWork.SaveChangesAsync(cancellationToken);
+        return deleted;
     }
 
     private static ProductDto Map(Product product) => new(product.ProductId, product.Name, product.Price);

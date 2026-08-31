@@ -2,11 +2,14 @@ using Core.Entities;
 
 namespace Core.Interfaces;
 
-public interface IProductRepository
+/// <summary>
+/// Aggregate-specific repository. It inherits standard operations and adds only product language.
+/// This is normally clearer than exposing a generic repository directly to application services.
+/// </summary>
+public interface IProductRepository : IRepository<Product>
 {
-    Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<Product?> GetByIdAsync(int productId, CancellationToken cancellationToken = default);
-    Task<Product> AddAsync(Product product, CancellationToken cancellationToken = default);
-    Task<bool> UpdateAsync(Product product, CancellationToken cancellationToken = default);
-    Task<bool> DeleteAsync(int productId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Product>> GetByPriceRangeAsync(
+        decimal minimumPrice,
+        decimal maximumPrice,
+        CancellationToken cancellationToken = default);
 }

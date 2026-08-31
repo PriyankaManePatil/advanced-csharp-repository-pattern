@@ -9,5 +9,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services) => services
         .AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("ProductCatalogue"))
-        .AddScoped<IProductRepository, ProductRepository>();
+        .AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
+        .AddScoped(typeof(IReadRepository<>), typeof(ReadOnlyRepository<>))
+        .AddScoped<IProductRepository, ProductRepository>()
+        .AddScoped<IUnitOfWork, EfUnitOfWork>();
 }

@@ -10,24 +10,29 @@ public sealed class ProductRepositoryTests : IAsyncDisposable
 {
     private readonly AppDbContext context;
     private readonly ProductRepository repository;
+    private readonly EfUnitOfWork unitOfWork;
 
     public ProductRepositoryTests()
     {
         context = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
         repository = new ProductRepository(context);
+        unitOfWork = new EfUnitOfWork(context);
     }
 
     [Fact]
     public async Task CrudLifecycle_Works()
     {
         var created = await repository.AddAsync(new Product { Name = "Monitor", Price = 200 });
+        await unitOfWork.SaveChangesAsync();
         Assert.True(created.ProductId > 0);
         Assert.Single(await repository.GetAllAsync());
         created.Name = "4K Monitor";
         Assert.True(await repository.UpdateAsync(created));
+        await unitOfWork.SaveChangesAsync();
         Assert.Equal("4K Monitor", (await repository.GetByIdAsync(created.ProductId))!.Name);
         Assert.True(await repository.DeleteAsync(created.ProductId));
+        await unitOfWork.SaveChangesAsync();
         Assert.Null(await repository.GetByIdAsync(created.ProductId));
     }
 

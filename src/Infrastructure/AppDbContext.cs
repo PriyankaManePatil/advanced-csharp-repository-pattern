@@ -10,7 +10,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var product = modelBuilder.Entity<Product>();
-        product.HasKey(x => x.ProductId);
+        product.HasKey(x => x.Id);
         product.Property(x => x.Name).HasMaxLength(200).IsRequired();
         product.Property(x => x.Price).HasPrecision(18, 2);
     }
