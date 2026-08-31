@@ -1,26 +1,43 @@
+using Application.DTOs;
+using Application.Interfaces;
+using Application.Services;
 using Infrastructure;
-using Infrastructure.Repositories;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure in-memory database (for demonstration)
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("InMemoryDb"));
-
-// Register repository and service layer
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddInfrastructure();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Minimal API route for reference
-app.MapGet("/products", async (IProductService service) =>
+app.UseExceptionHandler();
+if (app.Environment.IsDevelopment())
 {
-    var products = await service.GetAllAsync();
-    return Results.Ok(products);
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+var products = app.MapGroup("/api/products").WithTags("Products");
+products.MapGet("/", async (IProductService service, CancellationToken ct) => Results.Ok(await service.GetAllAsync(ct)));
+products.MapGet("/{id:int}", async (int id, IProductService service, CancellationToken ct) =>
+    await service.GetByIdAsync(id, ct) is { } product ? Results.Ok(product) : Results.NotFound());
+products.MapPost("/", async (SaveProductRequest request, IProductService service, CancellationToken ct) =>
+{
+    var created = await service.CreateAsync(request, ct);
+    return Results.Created($"/api/products/{created.ProductId}", created);
 });
+products.MapPut("/{id:int}", async (int id, SaveProductRequest request, IProductService service, CancellationToken ct) =>
+    await service.UpdateAsync(id, request, ct) ? Results.NoContent() : Results.NotFound());
+products.MapDelete("/{id:int}", async (int id, IProductService service, CancellationToken ct) =>
+    await service.DeleteAsync(id, ct) ? Results.NoContent() : Results.NotFound());
+
+app.MapHealthChecks("/health");
 
 app.Run();
+
+public partial class Program;

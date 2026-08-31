@@ -1,17 +1,17 @@
 using Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure
-{
-    /// <summary>
-    /// Represents the Entity Framework Core database context.
-    /// </summary>
-    public class AppDbContext : DbContext
-    {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
-        }
+namespace Infrastructure;
 
-        public DbSet<Product> Products { get; set; } = null!;
+public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+{
+    public DbSet<Product> Products => Set<Product>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        var product = modelBuilder.Entity<Product>();
+        product.HasKey(x => x.ProductId);
+        product.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        product.Property(x => x.Price).HasPrecision(18, 2);
     }
 }

@@ -1,89 +1,86 @@
-# Advanced C# Repository Pattern with Unit Testing (Reference Project)
+# Advanced C# Repository Pattern
 
-![Reference Only](https://img.shields.io/badge/Project-Reference%20Only-lightgrey?style=flat-square&color=blue)
+[![.NET CI](https://github.com/PriyankaManePatil/advanced-csharp-repository-pattern/actions/workflows/dotnet.yml/badge.svg)](https://github.com/PriyankaManePatil/advanced-csharp-repository-pattern/actions/workflows/dotnet.yml)
 
-This repository demonstrates a **clean, production-grade reference** implementation of the Repository Pattern in C#. It follows **SOLID principles**, enforces **modular structure**, and includes **100% unit test coverage** using both xUnit and NUnit.
+A buildable .NET 8 reference implementation of Repository Pattern and layered architecture. It demonstrates dependency inversion, an application service layer, Entity Framework Core, Minimal APIs, validation, error handling, automated tests and CI.
 
-🛑 **Note:** This project is for **architectural reference only**. It is **not intended to be run** in production environments.
+> This project uses EF Core's in-memory provider for learning and architectural demonstration. Use a durable database provider and production security/observability controls for a real deployment.
 
----
+## Architecture
 
-## 📁 Folder Structure
-
-```
-src/
-  Core/           → Interfaces and Domain Entities
-  Infrastructure/ → Repository Implementation and DbContext
-  Shared/         → Logging Interface
-  WebApi/         → Entry Point (Minimal API for simulation)
-
-tests/
-  RepositoryTests/ → Unit tests using xUnit and NUnit
-
-docs/             → Architecture Diagrams (optional visual aid)
+```text
+WebApi -> Application -> Core
+   |                       ^
+   +----> Infrastructure --+
 ```
 
----
+- **Core**: domain entities and persistence abstractions
+- **Application**: DTOs, validation and use-case orchestration
+- **Infrastructure**: EF Core context and repository implementation
+- **WebApi**: Minimal API endpoints, dependency injection, Swagger and exception handling
+- **UnitTests**: isolated application service tests
+- **IntegrationTests**: repository and HTTP endpoint tests
 
-## 🔧 Tech Stack
-- .NET 7 / .NET Core
-- Entity Framework Core (In-Memory DB)
-- xUnit & NUnit for testing
-- Minimal API (for structure only)
-- Clean folder separation
+![Architecture diagram](docs/architecture-diagram.png)
 
----
+## Technology
 
-## ✅ Highlights
+- .NET 8
+- ASP.NET Core Minimal APIs
+- Entity Framework Core In-Memory
+- xUnit, Moq and WebApplicationFactory
+- Coverlet code coverage
+- GitHub Actions
 
-- ✅ One class per file
-- ✅ Clear function and variable naming
-- ✅ SOLID principles
-- ✅ Dependency Injection
-- ✅ Repository Pattern
-- ✅ 100% test coverage (Add, Get, Update, Delete)
-- ✅ Fully commented, production-style code
+## Run locally
 
----
+Install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), then run:
 
-## 🧪 Testing Frameworks
-
-| Framework | When to Prefer |
-|-----------|----------------|
-| **xUnit** | Preferred for CI/CD (GitHub Actions, .NET CLI) |
-| **NUnit** | Common in legacy/enterprise test environments     |
-
-You can run tests like this (if running locally):
 ```bash
-dotnet test
+dotnet restore AdvancedRepositoryPattern.sln
+dotnet build AdvancedRepositoryPattern.sln
+dotnet run --project src/WebApi/WebApi.csproj
 ```
 
----
+In Development, Swagger is available at `http://localhost:<port>/swagger`. The exact port is printed by `dotnet run`.
 
-## 🖼 Architecture Diagram
+## API
 
-> Add this image to `docs/architecture-diagram.png` to visually represent your layers and relationships.
+| Method | Route | Result |
+|---|---|---|
+| GET | `/api/products` | All products |
+| GET | `/api/products/{id}` | Product or `404` |
+| POST | `/api/products` | Created product and `201` |
+| PUT | `/api/products/{id}` | `204` or `404` |
+| DELETE | `/api/products/{id}` | `204` or `404` |
+| GET | `/health` | Application health |
 
----
+Example request:
 
-## 🖼 Architecture Diagram
+```json
+{
+  "name": "Mechanical Keyboard",
+  "price": 99.50
+}
+```
 
-![Architecture Diagram](docs/architecture-diagram.png)
+## Test and coverage
 
-This diagram illustrates the separation of concerns in the project using Dependency Injection:
-- Web API calls Service Layer
-- Service Layer uses Repository (Data Access)
-- Repository uses EF Core to interact with the database
+```bash
+dotnet test AdvancedRepositoryPattern.sln --collect:"XPlat Code Coverage" --results-directory TestResults
+```
 
----
+Tests cover service validation, CRUD repository behaviour, missing records and HTTP CRUD status codes. CI executes restore, build and tests for every pull request and push to `main`.
 
-## 📜 License
+## Design decisions
 
-This project is licensed under the MIT License. Feel free to fork and adapt.
+- Read queries use `AsNoTracking`.
+- Repository operations accept cancellation tokens.
+- Update and delete return `bool` to represent not-found results without exceptions.
+- API contracts use DTOs rather than exposing EF Core entities.
+- Standard `ILogger<T>` is preferred over a custom logging wrapper.
+- An in-memory provider keeps the sample self-contained; it does not reproduce every relational-database behaviour.
 
----
+## License
 
-## 🧠 Why This Project Exists
-This repository exists to showcase how a senior developer or solution architect structures maintainable C# applications with full test coverage and scalable folder structure — even when not deployed.
-
-Great for interview prep, mentoring, and architectural discussions.
+Licensed under the MIT License.
