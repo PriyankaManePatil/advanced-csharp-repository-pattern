@@ -47,7 +47,7 @@ In Development, the OpenAPI document is available at `http://localhost:<port>/op
 
 ## Learning documentation
 
-The detailed learning path is in [`docs/README.md`](docs/README.md). It includes fundamentals, a repository-variant catalogue, a class-by-class walkthrough, decision tables, testing guidance and anti-patterns.
+The detailed learning path is in [`docs/README.md`](docs/README.md). It includes fundamentals, a repository-variant catalogue, a class-by-class walkthrough, decision tables, testing guidance, anti-patterns, interview Q&A, a glossary, hands-on exercises and an end-to-end request trace.
 
 Implemented examples include:
 

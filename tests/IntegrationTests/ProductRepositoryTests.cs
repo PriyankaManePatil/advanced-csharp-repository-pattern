@@ -8,6 +8,7 @@ namespace IntegrationTests;
 
 public sealed class ProductRepositoryTests : IAsyncDisposable
 {
+    // A unique database name prevents state leaking between parallel test instances.
     private readonly AppDbContext context;
     private readonly ProductRepository repository;
     private readonly EfUnitOfWork unitOfWork;
@@ -23,6 +24,7 @@ public sealed class ProductRepositoryTests : IAsyncDisposable
     [Fact]
     public async Task CrudLifecycle_Works()
     {
+        // Unlike unit tests, this exercises the real repository, DbContext and Unit of Work together.
         var created = await repository.AddAsync(new Product { Name = "Monitor", Price = 200 });
         await unitOfWork.SaveChangesAsync();
         Assert.True(created.ProductId > 0);

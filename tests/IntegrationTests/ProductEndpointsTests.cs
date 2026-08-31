@@ -8,12 +8,14 @@ namespace IntegrationTests;
 
 public sealed class ProductEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
 {
+    // WebApplicationFactory starts the real ASP.NET Core pipeline in memory without opening a network port.
     private readonly HttpClient client;
     public ProductEndpointsTests(WebApplicationFactory<Program> factory) => client = factory.CreateClient();
 
     [Fact]
     public async Task CreateGetUpdateDelete_ReturnExpectedStatusCodes()
     {
+        // One lifecycle test proves routing, JSON, DI, service, repository and status mapping work together.
         var create = await client.PostAsJsonAsync("/api/products", new SaveProductRequest { Name = "Laptop", Price = 800 });
         Assert.Equal(HttpStatusCode.Created, create.StatusCode);
         var product = await create.Content.ReadFromJsonAsync<ProductDto>();

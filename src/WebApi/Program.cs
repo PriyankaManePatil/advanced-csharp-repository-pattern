@@ -20,9 +20,12 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
 var products = app.MapGroup("/api/products").WithTags("Products");
+
+// Query endpoints translate nullable service results into HTTP 200/404 responses.
 products.MapGet("/", async (IProductService service, CancellationToken ct) => Results.Ok(await service.GetAllAsync(ct)));
 products.MapGet("/{id:int}", async (int id, IProductService service, CancellationToken ct) =>
     await service.GetByIdAsync(id, ct) is { } product ? Results.Ok(product) : Results.NotFound());
+// Command endpoints delegate validation and persistence decisions to the application service.
 products.MapPost("/", async (SaveProductRequest request, IProductService service, CancellationToken ct) =>
 {
     var created = await service.CreateAsync(request, ct);
@@ -33,8 +36,10 @@ products.MapPut("/{id:int}", async (int id, SaveProductRequest request, IProduct
 products.MapDelete("/{id:int}", async (int id, IProductService service, CancellationToken ct) =>
     await service.DeleteAsync(id, ct) ? Results.NoContent() : Results.NotFound());
 
+// Health checks provide a lightweight operational endpoint without mixing health logic into repositories.
 app.MapHealthChecks("/health");
 
 app.Run();
 
+// A public partial Program lets WebApplicationFactory locate the generated Minimal API entry point in tests.
 public partial class Program;
