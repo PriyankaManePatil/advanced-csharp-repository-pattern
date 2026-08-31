@@ -11,27 +11,33 @@ public sealed class LoggingRepositoryDecorator<TEntity>(
     ILogger<LoggingRepositoryDecorator<TEntity>> logger) : IRepository<TEntity>
     where TEntity : class, IEntity
 {
+    /// <inheritdoc />
     public Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default) =>
         inner.GetAllAsync(cancellationToken);
 
+    /// <inheritdoc />
     public Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         inner.GetByIdAsync(id, cancellationToken);
 
+    /// <inheritdoc />
     public Task<IReadOnlyList<TEntity>> ListAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default) =>
         inner.ListAsync(specification, cancellationToken);
 
+    /// <inheritdoc />
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Staging creation of {EntityType}", typeof(TEntity).Name);
         return await inner.AddAsync(entity, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<bool> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Staging update of {EntityType} {EntityId}", typeof(TEntity).Name, entity.Id);
         return await inner.UpdateAsync(entity, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Staging deletion of {EntityType} {EntityId}", typeof(TEntity).Name, id);

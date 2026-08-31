@@ -8,10 +8,12 @@ namespace Application.Services;
 /// <summary>Coordinates validation, repository operations and the transaction boundary.</summary>
 public sealed class ProductService(IProductRepository repository, IUnitOfWork unitOfWork) : IProductService
 {
+    /// <inheritdoc />
     public async Task<IReadOnlyList<ProductDto>> GetAllAsync(CancellationToken cancellationToken = default) =>
         // Mapping here prevents EF entities from leaking through the application boundary.
         (await repository.GetAllAsync(cancellationToken)).Select(Map).ToList();
 
+    /// <inheritdoc />
     public async Task<ProductDto?> GetByIdAsync(int productId, CancellationToken cancellationToken = default)
     {
         EnsureValidId(productId);
@@ -19,6 +21,7 @@ public sealed class ProductService(IProductRepository repository, IUnitOfWork un
         return product is null ? null : Map(product);
     }
 
+    /// <inheritdoc />
     public async Task<ProductDto> CreateAsync(SaveProductRequest request, CancellationToken cancellationToken = default)
     {
         // Guard clauses fail before any persistence work, keeping invalid state out of the repository.
@@ -30,6 +33,7 @@ public sealed class ProductService(IProductRepository repository, IUnitOfWork un
         return Map(created);
     }
 
+    /// <inheritdoc />
     public async Task<bool> UpdateAsync(int productId, SaveProductRequest request, CancellationToken cancellationToken = default)
     {
         EnsureValidId(productId);
@@ -45,6 +49,7 @@ public sealed class ProductService(IProductRepository repository, IUnitOfWork un
         return updated;
     }
 
+    /// <inheritdoc />
     public async Task<bool> DeleteAsync(int productId, CancellationToken cancellationToken = default)
     {
         EnsureValidId(productId);

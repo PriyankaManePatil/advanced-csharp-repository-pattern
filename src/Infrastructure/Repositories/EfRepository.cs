@@ -11,17 +11,25 @@ namespace Infrastructure.Repositories;
 public class EfRepository<TEntity>(AppDbContext context) : IRepository<TEntity>
     where TEntity : class, IEntity
 {
+    /// <summary>
+    /// Exposes the entity set to specialised repositories while keeping the shared CRUD behaviour here.
+    /// </summary>
     protected DbSet<TEntity> Entities { get; } = context.Set<TEntity>();
 
+    /// <inheritdoc />
     public virtual async Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default) =>
         await Entities.AsNoTracking().ToListAsync(cancellationToken);
 
+    /// <inheritdoc />
     public virtual Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         Entities.AsNoTracking().SingleOrDefaultAsync(entity => entity.Id == id, cancellationToken);
 
+    /// <inheritdoc />
     public virtual async Task<IReadOnlyList<TEntity>> ListAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default) =>
         await SpecificationEvaluator.Apply(Entities, specification).ToListAsync(cancellationToken);
 
+    /// <inheritdoc />
+    /// <remarks>The entity is tracked but is not persisted until Unit of Work saves the context.</remarks>
     public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entity);
@@ -29,6 +37,8 @@ public class EfRepository<TEntity>(AppDbContext context) : IRepository<TEntity>
         return entity;
     }
 
+    /// <inheritdoc />
+    /// <remarks>The existence check lets callers distinguish an update from a not-found result.</remarks>
     public virtual async Task<bool> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entity);
@@ -37,6 +47,8 @@ public class EfRepository<TEntity>(AppDbContext context) : IRepository<TEntity>
         return true;
     }
 
+    /// <inheritdoc />
+    /// <remarks><c>FindAsync</c> can reuse a tracked entity before querying the database.</remarks>
     public virtual async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await Entities.FindAsync([id], cancellationToken);
