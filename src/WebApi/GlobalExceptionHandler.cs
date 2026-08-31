@@ -7,6 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 /// </summary>
 public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
+    /// <summary>
+    /// Converts exceptions that escaped an endpoint into RFC-style Problem Details. Validation
+    /// errors are safe to expose as 400 responses; unexpected exception details are logged but
+    /// deliberately hidden from clients.
+    /// </summary>
     public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
     {
         logger.LogError(exception, "An unhandled error occurred while processing the request.");

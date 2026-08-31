@@ -13,12 +13,15 @@ public sealed class InMemoryRepository<TEntity> : IRepository<TEntity> where TEn
 {
     private readonly ConcurrentDictionary<int, TEntity> entities = new();
 
+    /// <inheritdoc />
     public Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<TEntity>>(entities.Values.ToList());
 
+    /// <inheritdoc />
     public Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         Task.FromResult(entities.GetValueOrDefault(id));
 
+    /// <inheritdoc />
     public Task<IReadOnlyList<TEntity>> ListAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
     {
         // Compile is acceptable in a test double; production EF repositories translate the expression to SQL.
@@ -29,12 +32,14 @@ public sealed class InMemoryRepository<TEntity> : IRepository<TEntity> where TEn
         return Task.FromResult<IReadOnlyList<TEntity>>(query.ToList());
     }
 
+    /// <inheritdoc />
     public Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         if (!entities.TryAdd(entity.Id, entity)) throw new InvalidOperationException($"Entity {entity.Id} already exists.");
         return Task.FromResult(entity);
     }
 
+    /// <inheritdoc />
     public Task<bool> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         if (!entities.ContainsKey(entity.Id)) return Task.FromResult(false);
@@ -42,6 +47,7 @@ public sealed class InMemoryRepository<TEntity> : IRepository<TEntity> where TEn
         return Task.FromResult(true);
     }
 
+    /// <inheritdoc />
     public Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default) =>
         Task.FromResult(entities.TryRemove(id, out _));
 }

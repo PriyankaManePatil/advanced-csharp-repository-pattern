@@ -43,6 +43,9 @@ dotnet build AdvancedRepositoryPattern.sln
 dotnet run --project src/WebApi/WebApi.csproj
 ```
 
+The repository's `global.json` pins the .NET 10 SDK feature band and permits only compatible patch
+roll-forward. This makes learner and CI results reproducible without allowing preview SDKs.
+
 In Development, the OpenAPI document is available at `http://localhost:<port>/openapi/v1.json`.
 
 ## Learning documentation
@@ -86,6 +89,8 @@ dotnet test AdvancedRepositoryPattern.sln --collect:"XPlat Code Coverage" --resu
 ```
 
 Tests cover service validation, CRUD repository behaviour, missing records and HTTP CRUD status codes. CI executes restore, build and tests for every pull request and push to `main`.
+Coverage is collected as diagnostic evidence; the project intentionally makes no unsupported claim
+of 100% coverage and currently does not enforce a numeric coverage gate.
 
 ## Design decisions
 
