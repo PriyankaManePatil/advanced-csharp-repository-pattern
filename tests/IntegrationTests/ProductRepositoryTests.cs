@@ -2,6 +2,7 @@ using Core.Entities;
 using Infrastructure;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace IntegrationTests;
 

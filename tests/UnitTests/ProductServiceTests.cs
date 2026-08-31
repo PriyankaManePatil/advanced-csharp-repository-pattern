@@ -3,6 +3,7 @@ using Application.Services;
 using Core.Entities;
 using Core.Interfaces;
 using Moq;
+using Xunit;
 
 namespace UnitTests;
 
