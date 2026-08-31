@@ -9,16 +9,20 @@ namespace UnitTests;
 
 public sealed class ProductServiceTests
 {
+    // Unit tests isolate application decisions; EF Core is intentionally absent from this test project.
     private readonly Mock<IProductRepository> repository = new();
     private readonly Mock<IUnitOfWork> unitOfWork = new();
 
     [Fact]
     public async Task CreateAsync_TrimsNameAndReturnsCreatedProduct()
     {
+        // Arrange: the repository simulates database-generated identity assignment.
         repository.Setup(x => x.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Product product, CancellationToken _) => { product.ProductId = 1; return product; });
+        // Act: invoke the use case through the real application service.
         var result = await new ProductService(repository.Object, unitOfWork.Object)
             .CreateAsync(new SaveProductRequest { Name = "  Keyboard  ", Price = 99.50m });
+        // Assert: verify observable output; other tests verify collaboration/commit behaviour.
         Assert.Equal(new ProductDto(1, "Keyboard", 99.50m), result);
     }
 
